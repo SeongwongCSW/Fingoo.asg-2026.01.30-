@@ -1,42 +1,37 @@
 version: '3.8'
 
 services:
-  # [서비스 1] 우리가 만든 NestJS 서버
+  # NestJS Server
   app:
-    container_name: fingoo-backend
+    container_name: fingoo.asg
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000" # 내 컴퓨터 3000번 -> 도커 내부 3000번 연결
+      - "3000:3000"
     env_file:
-      - .env # .env 파일을 읽어서 환경변수로 넣어줌
+      - .env
     environment:
-      # 🚨 중요: 도커 내부에서는 'localhost'가 아니라 서비스 이름('mysql_db')으로 찾아야 합니다.
       - DB_HOST=mysql_db
-      # DB가 켜지기 전에 서버가 먼저 켜지면 죽을 수 있으니, 죽으면 다시 켜라고 설정
       - TZ=Asia/Seoul
     restart: always
     depends_on:
-      - mysql_db # DB가 켜진 뒤에 실행
+      - mysql_db
 
-  # [서비스 2] MySQL 데이터베이스
+  # MySQL DB
   mysql_db:
     image: mysql:8.0
     container_name: fingoo-mysql
     restart: always
     environment:
-      # .env 파일에 있는 내용을 그대로 끌어다 씁니다.
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_DATABASE}
       TZ: Asia/Seoul
     ports:
       - "3306:3306"
     volumes:
-      # DB 껐다 켜도 데이터 날아가지 않게 내 컴퓨터와 연결 (마운트)
       - ./db_data:/var/lib/mysql
     command: 
-      # 한글 깨짐 방지 설정
       --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
 volumes:
